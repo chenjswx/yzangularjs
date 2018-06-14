@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.2/angular.js"></script>
+    <script src="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.js"></script>
+</head>
+<body ng-controller="ngtalbeCrl as vm">
+        <table ng-table="vm.tableParams" class="table" show-filter="true">
+                <tr ng-repeat="user in $data">
+                    <td title="'Name'" filter="{ name: 'text'}" sortable="'name'">
+                        {{user.name}}</td>
+                    <td title="'Age'" filter="{ age: 'number'}" sortable="'age'">
+                        {{user.age}}</td>
+                </tr>
+            </table>
+<script type="text/javascript">
+    angular.module('myApp',['ngTable'])
+    .controller('ngtalbeCrl',['NgTableParams',function(NgTableParams){
+    var self=this;
+    self.mes='hello';
+    var data = [{name: "Moroni", age: 50} /*,*/];
+    self.tableParams = new NgTableParams({}, { dataset: data});
+}])
+
+</script>
+</body>
+</html>

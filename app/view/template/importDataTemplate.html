@@ -1,0 +1,8 @@
+<div ng-controller="importDataCtrl as ctrl">
+    
+    <input type="file" name="file" class="form-control"
+                       onchange="angular.element(this).scope().loadFile(this.files)" />
+    <input type="button" value="Import Data" class="btn btn-default"
+                       ng-click="handleFile()" />
+    
+</div>

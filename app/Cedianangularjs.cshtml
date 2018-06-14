@@ -1,0 +1,353 @@
+﻿
+@{
+    ViewBag.Title = "Cedianangularjs";
+}
+
+<head>
+    <script src="~/Scripts/angular.js"></script>
+    <script src="~/Scripts/customFilters.js"></script>
+    <script src="~/Scripts/importData.js"></script>
+    <script src="~/Scripts/jszip.js"></script>
+    <script src="~/Scripts/xlsx.full.min.js"></script>
+    <script src="~/Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+    <script>
+        angular.module("cedianvalues", ["customFilters", "importData", "ui.bootstrap"])
+        .constant("dataUrl", { "cdvalue": "/api/CedianValues", "cddetai": "/api/CdDetails/Get" })
+        .constant("pageCount", 5)
+        .factory("modalData", function () {
+            var modaldatas = [];
+            return {
+                pushdata: function (value) {
+                    return modaldatas.push(value);
+                },
+                getdata: function () {
+
+                return modaldatas;
+            }
+            }
+        })
+        .controller("alldataCtrl", function ($scope, $http, dataUrl, pageCount, modalData,$filter) {
+            $scope.data = {};
+            $scope.modaldatas = modalData.getdata();
+            //定义过滤器数据，用于搜索数据
+            var filterdata = { cedianBianhao: '', jianceJd: '' };
+            $scope.getallcdvalue = function () {
+                $http.get(dataUrl.cdvalue+"/Get")
+                .success(function (data) {
+                    $scope.data.cdvalues = null;
+                    $scope.data.cdvalues = data;
+                    $scope.filterdatas = $filter('filter')($scope.data.cdvalues, filterdata);
+                    $scope.itemCount = $scope.filterdatas.length;
+                })
+                .error(function (error) {
+                    $scope.data.error = error;
+                });
+            }
+
+
+            $http.get(dataUrl.cddetai)
+            .success(function (data) {
+                $scope.data.cddetails = data;
+            })
+            .error(function (error) {
+                $scope.data.error = error;
+            });
+
+            $scope.createcdvalue = function (cdvalue) {
+                $http.post(dataUrl.cdvalue + "/PostcdVaule", cdvalue)
+                .success(function (data) {
+                    $scope.data.cdvalues.push(data);
+                })
+                .error(function (error) {
+                    $scope.data.error = error;
+                });
+            }
+
+            $scope.deletecdvalue = function (cdvalue) {
+                $http.delete(dataUrl.cdvalue + "/Delete" + "/" + cdvalue.id)
+                .success(function () {
+                    $scope.data.cdvalues.splice($scope.data.cdvalues.indexOf(cdvalue), 1);
+                })
+                .error(function (error) {
+                    $scope.data.error = error;
+                });
+            }
+
+            $scope.editcdvalue = function (cdvalue) {
+                $http.put(dataUrl.cdvalue+"/Put", cdvalue)
+                .success(function () {
+                    $scope.getallcdvalue();
+                    $scope.editedcdvalue = null;
+                    $scope.editcd = null;
+                })
+                .error(function (error) {
+                    $scope.data.error = error;
+                });
+            }
+            $scope.startEdit = function (cdvalue) {
+                $scope.editedcdvalue = {};
+                $scope.editcd = cdvalue;
+                $scope.editedcdvalue.Id = cdvalue.id;
+                $scope.editedcdvalue.CdValue = cdvalue.cdValue;
+                $scope.editedcdvalue.DanWei = cdvalue.danWei;
+                $scope.editedcdvalue.JianceJd = cdvalue.jianceJd;
+                $scope.editedcdvalue.JianceData = cdvalue.jianceData;
+                console.log("editcd.cdvale:" + $scope.editcd.cdValue)
+            }
+
+            $scope.cancelEdit = function () {
+                $scope.editedcdvalue = null;
+                $scope.editcd = null;
+            }
+            //分页
+            $scope.selectedPage = 1;
+            $scope.pageSize = pageCount;
+
+            $scope.selectPage = function (newPage) {
+                $scope.selectedPage = newPage;
+            }
+
+            $scope.getPageClass = function (page) {
+                return $scope.selectedPage == page ? "btn-primary" : "";
+            }
+
+            $scope.getallcdvalue();
+
+         
+
+
+        })
+        .controller("listPageCtrl", function ($scope, pageCount) {
+            $scope.selectedPage = 1;
+            $scope.pageSize = pageCount;
+
+            $scope.selectPage = function (newPage) {
+                $scope.selectedPage = newPage;
+            }
+
+            $scope.getPageClass = function (page) {
+                return $scope.selectedPage == page ? "btn-primary" : "";
+            }
+
+        })
+        .controller('modalController', function ($scope, $rootScope, $modal) {
+            var datamModal = ['itme1','itme2','itme3']
+            $scope.openModal = function (i) {
+                var modalInstance = $modal.open({
+                    templateUrl: '../html/creatModal.html',//script标签中定义的id
+                    controller: 'modalCtrl',//modal对应的Controller
+                    resolve: {
+                        data: function () {//data作为modal的controller传入的参数
+                            return i;//用于传递数据
+                        }
+                    }
+                })
+            }
+        })
+        //模态框对应的Controller
+        .controller('modalCtrl', function ($scope, $modalInstance, data, $http, dataUrl, modalData) {
+            $scope.dataModal = {};
+            $scope.dataModal.CedianDetailId = data;
+
+            //在这里处理要进行的操作
+            $scope.ok = function (dataModal) {
+                $http.post(dataUrl.cdvalue + "/PostcdVaule", dataModal)
+               .success(function (data) {
+                   modalData.pushdata(data);
+               })
+               .error(function (error) {
+                   $scope.data.error = error;
+               });
+
+                $modalInstance.close();
+            };
+            $scope.cancel = function () {
+                $modalInstance.dismiss('cancel');
+            }
+        });
+        
+    </script>
+
+</head>
+
+<h2>测点值</h2>
+
+
+
+<div ng-app="cedianvalues" id="parentdiv">
+    <div ng-controller="alldataCtrl">
+        <div ng-controller="modalController">
+            <button ng-click="openModal(1)">打开模态框</button>
+
+            <div ng-controller="inmportCtrl">
+                <input type="file" name="file" class="form-control"
+                       onchange="angular.element(this).scope().loadFile(this.files)" />
+                <input type="button" value="Import Data" class="btn btn-default"
+                       ng-click="handleFile(dataUrl.cdvalue + '/PostcdVaules')" />
+            </div>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            测点编号
+                        </th>
+                        <th>
+                            测点值
+                        </th>
+                        <th>
+                            单位
+                        </th>
+                        <th>
+                            测试截面
+                        </th>
+                        <th>
+                            测试日期
+                        </th>
+                        <th>处理</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr ng-class="{danger:editedcdvalue}" ng-show="editedcdvalue.Id">
+                        <td><select ng-model="editedcdvalue.CedianDetailId" ng-options="item.id as item.cdBianHao for item in data.cddetails"></select></td>
+                        <td><input type="number" step="0.01" class="form-control" ng-model="editedcdvalue.CdValue" /></td>
+
+                        <td>
+                            <select ng-model="editedcdvalue.DanWei">
+                                <option>Mpa</option>
+                                <option>Pa</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select ng-model="editedcdvalue.JianceJd">
+                                <option>W1_E1梁段吊装</option>
+                                <option>W2_E2梁段吊装</option>
+                            </select>
+                        </td>
+                        <td><input type="date" class="form-control datepicker " ng-model="editedcdvalue.JianceData" /></td>
+                        <td>
+                            <a class="btn btn-primary" ng-click="editcdvalue(editedcdvalue)">保存</a>
+                            <a class="btn btn-danger" ng-click="cancelEdit()">取消</a>
+                            
+                        </td>
+                    </tr>
+
+                    <tr ng-repeat="item in filterdatas | skip:(selectedPage-1)*pageSize|limitTo:pageSize">
+                        <td>{{item.cedianBianhao}}</td>
+                        <td>{{item.cdValue}}</td>
+                        <td>{{item.danWei}}</td>
+                        <td>{{item.jianceJd}}</td>
+                        <td>{{item.jianceData}}</td>
+                        <td>
+                            <a class="btn btn-primary" ng-click="startEdit(item)">编辑</a>
+                            <a class="btn btn-danger" ng-click="deletecdvalue(item)">删除</a>
+                            <button class="btn btn-primary" ng-click="openModal(item.cedianDetailId)">打开模态框</button>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+            <div >
+              <pagination total-items="itemCount" ng-model="selectedPage" max-size="5" items-per-page="pageSize" first-text="第一页" previous-text="上一页" next-text="下一页" last-text="最后页" boundary-links="true" boundary-link-numbers="true" rotate="true" force-ellipses="false"></pagination>
+            </div>
+
+        </div>
+        <div>{{itemCount}}</div>
+        <div class="pull-right btn-group" >
+            <a ng-repeat="page in data.cdvalues | pageCount:pageSize" ng-click="selectPage($index+1)" class="btn btn-default"
+               ng-class="getPageClass($index+1)">{{$index+1}}</a>
+        </div>
+
+        <div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h2 class="panel-title">添加</h2>
+                </div>
+                <div class="panel-body">
+                    <form class="form-horizontal" >
+                        <div class="form-group">
+                            <label for="inputCdDetail" class="col-sm-2 control-label">测点编号</label>
+                            <div class="col-sm-10">
+                                <select ng-model="cdvalue.CedianDetailId" ng-options="item.id as item.cdBianHao for item in data.cddetails"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputDanwei" class="col-sm-2 control-label">单位</label>
+                            <div class="col-sm-10">
+                                <select ng-model="cdvalue.DanWei">
+                                    <option>Mpa</option>
+                                    <option>Pa</option>
+                                </select>
+
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputJianceJd" class="col-sm-2 control-label">监测阶段</label>
+                            <div class="col-sm-10">
+                                <select  ng-model="cdvalue.JianceJd">
+                                    <option>W1_E1梁段吊装</option>
+                                    <option>W2_E2梁段吊装</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" >
+                            <label for="inputCdValue" class="col-sm-2 control-label">测点值</label>
+                            <div class="col-sm-10">
+                                <input type="number" step="0.01" class="form-control" id="inputCdValue" ng-model="cdvalue.CdValue" />
+                            </div>
+                            <label for="inputJianceDate" class="col-sm-2 control-label">监测日期</label>
+                            <div class="col-sm-10">
+                                <input type="date" class="form-control datepicker " id="inputJianceDate" ng-model="cdvalue.JianceData" />
+                            </div>
+
+                        </div>
+
+                        <button  class="btn btn-default" ng-click="createcdvalue(cdvalue)">提交</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!--模态窗口新增值的显示-->
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        测点编号
+                    </th>
+                    <th>
+                        测点值
+                    </th>
+                    <th>
+                        单位
+                    </th>
+                    <th>
+                        测试截面
+                    </th>
+                    <th>
+                        测试日期
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr ng-repeat="item in  modaldatas ">
+                    <td>{{item.cedianBianhao}}</td>
+                    <td>{{item.cdValue}}</td>
+                    <td>{{item.danWei}}</td>
+                    <td>{{item.jianceJd}}</td>
+                    <td>{{item.jianceData}}</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+    
+    
+</div>
+
+
