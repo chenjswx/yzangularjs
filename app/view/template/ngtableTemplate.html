@@ -1,4 +1,4 @@
-<table ng-table="ctrl.tableParams" class="table" show-filter="true">
+<table ng-table="ctrl.tableParams" class="table" show-filter="true" ng-controller="listCtrl as ctrl">
         <tr ng-repeat="item in $data">
             <td title="'CDID'" filter="{ CedianDetailId: 'text'}" sortable="'CedianDetailId'">
                 {{item.CedianDetailId}}</td>

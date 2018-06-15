@@ -5,22 +5,18 @@ angular.module('stressApp')
     var data = [{name: "Moroni", age: 50} /*,*/];
     self.tableParams = new NgTableParams({}, { dataset: data});
 }])
-.controller('towerCtrl',['datafromxls','NgTableParams',function(datafromxls,NgTableParams){
+.controller('towerCtrl',[function(){
     var self=this;
-    self.list=function()
-    {
-        return  datafromxls.list();
-    }
-    var datas=datafromxls.list();
-    self.tableParams = new NgTableParams({}, { dataset: datas});
-    self.startEdit=function(item)
-    {
-        alert(item.CdValue);
-    }
+   
     self.message='this is the tower stress data';
     self.testTemplate='view/template/testTemplate.html';
     self.importDataTemplate='view/template/importDataTemplate.html';
     self.tableTemplate='view/template/ngtableTemplate.html';
+}])
+.controller('listCtrl',['datafromxls','NgTableParams',function(datafromxls,NgTableParams){
+    var self=this;
+    var datas=datafromxls.list();
+    self.tableParams=new NgTableParams({},{dataset:datas});
 }])
 .controller('girderCtrl',[function(){
     var self=this;
