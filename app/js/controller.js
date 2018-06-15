@@ -13,8 +13,14 @@ angular.module('stressApp')
     self.importDataTemplate='view/template/importDataTemplate.html';
     self.tableTemplate='view/template/ngtableTemplate.html';
 }])
-.controller('listCtrl',['datafromxls','NgTableParams',function(datafromxls,NgTableParams){
+.controller('listCtrl',['datafromxls','NgTableParams','$modal',function(datafromxls,NgTableParams,$modal){
     var self=this;
+    self.openModal=function(item){
+        var modalInstance=$modal.open({
+            templateUrl:'view/template/modalput.html'
+        })
+
+    }
     var datas=datafromxls.list();
     self.tableParams=new NgTableParams({},{dataset:datas});
 }])
