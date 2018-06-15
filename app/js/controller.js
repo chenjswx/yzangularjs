@@ -17,13 +17,19 @@ angular.module('stressApp')
     var self=this;
     self.openModal=function(item){
         var modalInstance=$modal.open({
-            templateUrl:'view/template/modalput.html'
+            templateUrl:'view/template/modalEid.html',
+            controller:'modalCtrl',
+            resolve:{
+                data:function(){
+                    return item;
+                }
+            }
         })
-
     }
     var datas=datafromxls.list();
     self.tableParams=new NgTableParams({},{dataset:datas});
 }])
+.controller('modalCtrl',[])
 .controller('girderCtrl',[function(){
     var self=this;
     self.message='this is the steel box girder stress data';
