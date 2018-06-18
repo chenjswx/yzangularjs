@@ -15,21 +15,51 @@ angular.module('stressApp')
 }])
 .controller('listCtrl',['datafromxls','NgTableParams','$modal',function(datafromxls,NgTableParams,$modal){
     var self=this;
-    self.openModal=function(item){
-        var modalInstance=$modal.open({
-            templateUrl:'view/template/modalEid.html',
-            controller:'modalCtrl',
-            resolve:{
-                data:function(){
-                    return item;
-                }
+    self.openEditModal = function(item) {
+                var modalInstance = $modal.open({
+                    templateUrl : 'view/template/modalEdit.html',//script标签中定义的id
+                    controller : 'modalEditCtrl',//modal对应的Controller
+                    resolve : {
+                        data : function() {//data作为modal的controller传入的参数
+                             return item;//用于传递数据
+                        }
+                    }
+                })
             }
-        })
-    }
+    self.openAddModal = function() {
+                var modalInstance = $modal.open({
+                    templateUrl : 'view/template/modalAdd.html',//script标签中定义的id
+                    controller : 'modalAddCtrl',//modal对应的Controller
+                    resolve : {
+                        data : function() {//data作为modal的controller传入的参数
+                             return 1;//用于传递数据
+                        }
+                    }
+                })
+            }
     var datas=datafromxls.list();
     self.tableParams=new NgTableParams({},{dataset:datas});
 }])
-.controller('modalCtrl',[])
+.controller('modalEditCtrl',['datafromxls','data','$modalInstance','$scope',function(datafromxls,data,$modalInstance,$scope){
+    $scope.modalItem=data;
+    $scope.ok=function(modalItem){
+        datafromxls.list().splice(datafromxls.list().indexOf(data),1,modalItem);
+        $modalInstance.close();
+    }
+    $scope.cancel=function(){
+        $modalInstance.dismiss('cancel');
+    }
+}])
+.controller('modalAddCtrl',['datafromxls','data','$modalInstance','$scope',function(datafromxls,data,$modalInstance,$scope){
+    $scope.modalAddItem=[];
+    $scope.ok=function(modalAddItem){
+        datafromxls.list().push(modalAddItem);
+        $modalInstance.close();
+    }
+    $scope.cancel=function(){
+        $modalInstance.dismiss('cancel');
+    }
+}])
 .controller('girderCtrl',[function(){
     var self=this;
     self.message='this is the steel box girder stress data';

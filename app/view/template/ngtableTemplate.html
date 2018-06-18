@@ -1,14 +1,19 @@
-<table ng-table="ctrl.tableParams" class="table" show-filter="true" ng-controller="listCtrl as ctrl">
-        <tr ng-repeat="item in $data">
+<div ng-controller="listCtrl as ctrl">
+    <br>
+    <button type="button" class="btn btn-default" ng-click="ctrl.openAddModal()">添加</button>
+    
+<table ng-table="ctrl.tableParams" class="table" show-filter="true" >
+        <tr ng-repeat="item in $data track by $index ">
             <td title="'CDID'" filter="{ CedianDetailId: 'text'}" sortable="'CedianDetailId'">
                 {{item.CedianDetailId}}</td>
             <td title="'CDVE'" filter="{ CdValue: 'text'}" sortable="'CdValue'">
                 {{item.CdValue}}</td>
             
             <td title="'处理'">
-                <a class="btn btn-primary" ng-click="ctrl.startEdit(item)">编辑</a>
-                <a class="btn btn-danger" ng-click="deletecdvalue(item)">删除</a>
-                <button class="btn btn-primary" ng-click="openModal(item.cedianDetailId)">打开模态框</button>
+                <a  ng-click="ctrl.openEditModal(item)">编辑</a>
+                <a  ng-click="deletecdvalue(item)">删除</a>
+                <a  ng-click="openModal(item.cedianDetailId)">打开模态框</a>
             </td>
         </tr>
     </table>
+</div>

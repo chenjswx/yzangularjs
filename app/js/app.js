@@ -1,4 +1,4 @@
-angular.module('stressApp',["ngRoute","importData","ngTable"]);
+angular.module('stressApp',["ngRoute","importData","ngTable","ui.bootstrap"]);
 angular.module('importData',[])
 .factory('datafromxls',[function(){
     var datas=[
